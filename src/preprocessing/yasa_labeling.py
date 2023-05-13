@@ -86,4 +86,3 @@ if __name__ == '__main__':
     dl = DataLoader()
     yasl = YasaLabeler(dl)
     yasl.generate_labels()
-    

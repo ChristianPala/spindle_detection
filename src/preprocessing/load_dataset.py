@@ -25,7 +25,7 @@ class DataLoader:
         # manually insert the txt files at the correct position for the edf files causing issues
         self.__files.insert(0, txt_files[0])
         self.__files.insert(2, txt_files[1])
-
+        self.excerpts = []
     def load_txt(self) -> List[pd.DataFrame]:
         """
         The method to load the txt files from the data folder, creates pandas dataframes from them and
