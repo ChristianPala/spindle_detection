@@ -391,6 +391,8 @@ class DataProcessor:
 
             # Down-sample to match the window size
             window_size = int(self.data_loader.get_frequencies()[i] * DataProcessor.__window_size)
+            # Here we can choose to downsample by taking the mean for a more robust approach or
+            # by taking the max, due to data scarcity with the positive cases, we chose the max.
             y_patient_downsampled = y_patient.reshape(-1, window_size).max(axis=1)
 
             self.y.append(y_patient_downsampled)
