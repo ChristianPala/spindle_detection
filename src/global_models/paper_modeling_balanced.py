@@ -14,6 +14,7 @@ class BalancedGlobalModel(GlobalModel):
     """
     This class extends the GlobalModel to handle imbalanced datasets using undersampling and oversampling techniques.
     """
+
     def __init__(self, model, X_train, y_train, X_test, y_test, sampling_strategy=None) -> None:
         """
         Constructor for the BalancedGlobalModel class.
@@ -32,12 +33,12 @@ class BalancedGlobalModel(GlobalModel):
             oversampler = RandomOverSampler(random_state=42)
             self.X_train, self.y_train = oversampler.fit_resample(self.X_train, self.y_train)
 
-    def train_eval_model(self, print_confusion_matrix=False) -> Union[str, Dict[str, Dict[str, float]]]:
+    def train_eval_model(self, filename: str, print_confusion_matrix=False) -> Union[str, Dict[str, Dict[str, float]]]:
         """
         This function balances the data before training and evaluating the model.
         """
         self.balance_data()
-        return super().train_eval_model(print_confusion_matrix)
+        return super().train_eval_model(filename, print_confusion_matrix)
 
 
 # Driver code:
@@ -51,23 +52,27 @@ if __name__ == '__main__':
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.train_val_test_split_ratio()
 
     # Train and evaluate the support vector machine model on the raw dataset with undersampling
+    print("Global model with undersampling:")
     svc_model_undersampled = BalancedGlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test, 'undersample')
-    report_undersampled = svc_model_undersampled.train_eval_model(print_confusion_matrix=True)
-    print("\nMetrics for the minority class with undersampling:")
-    print(f"Precision: {report_undersampled['1']['precision']: .3f}")
-    print(f"Recall: {report_undersampled['1']['recall']: .3f}")
-    print(f"F1-score: {report_undersampled['1']['f1-score']: .3f}")
+    report_undersampled = svc_model_undersampled.train_eval_model \
+        (filename='Global_Random Under Sampler_SVC_confusion_matrix', print_confusion_matrix=True)
+    print("\nMetrics for the majority class with undersampling:")
+    print(f"Precision: {report_undersampled['0']['precision']: .3f}")
+    print(f"Recall: {report_undersampled['0']['recall']: .3f}")
+    print(f"F1-score: {report_undersampled['0']['f1-score']: .3f}")
 
     # Save the model
     svc_model_undersampled.save_model('Global_Random Under Sampler_SVC')
 
+    print("\nGlobal model with oversampling:")
     # Train and evaluate the support vector machine model on the raw dataset with oversampling
     svc_model_oversampled = BalancedGlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test, 'oversample')
-    report_oversampled = svc_model_oversampled.train_eval_model(print_confusion_matrix=True)
-    print("\nMetrics for the minority class with oversampling:")
-    print(f"Precision: {report_oversampled['1']['precision']: .3f}")
-    print(f"Recall: {report_oversampled['1']['recall']: .3f}")
-    print(f"F1-score: {report_oversampled['1']['f1-score']: .3f}")
+    report_oversampled = svc_model_oversampled.train_eval_model \
+        (filename='Global_Random Over Sampler_SVC_confusion_matrix', print_confusion_matrix=True)
+    print("\nMetrics for the majority class with oversampling:")
+    print(f"Precision: {report_oversampled['0']['precision']: .3f}")
+    print(f"Recall: {report_oversampled['0']['recall']: .3f}")
+    print(f"F1-score: {report_oversampled['0']['f1-score']: .3f}")
 
     # Save the model
     svc_model_undersampled.save_model('Global_Random Over Sampler_SVC')

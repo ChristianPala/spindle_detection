@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import os
 import pickle
-from config import DATA, MODELS
+from config import DATA, MODELS, RESULTS
 
 # Initialization
 np.random.seed(42)  # For reproducibility
@@ -81,7 +81,7 @@ class GlobalModel:
         self.y_test = y_test
         self.scaler = StandardScaler()
 
-    def train_eval_model(self, print_confusion_matrix=False) -> Union[str, Dict[str, Dict[str, float]]]:
+    def train_eval_model(self, filename: str, print_confusion_matrix=False) -> Union[str, Dict[str, Dict[str, float]]]:
         """
         This function trains and evaluates the model.
         """
@@ -91,15 +91,15 @@ class GlobalModel:
         y_pred = self.model.predict(self.X_test)
         # Post-process the predictions
         y_pred = adjust_prediction(y_pred)
-        f_1 = f1_score(self.y_test, y_pred, average='weighted')
+        f_1 = f1_score(self.y_test, y_pred)
         print(classification_report(self.y_test, y_pred))
-        print(f"Weighted f-1 score: {f_1:.3f}")
+        print(f"Binary F-1 score: {f_1:.3f}")
         if print_confusion_matrix:
             cm = confusion_matrix(self.y_test, y_pred)
             disp = ConfusionMatrixDisplay(confusion_matrix=cm)
             disp.plot(cmap=plt.cm.Blues)
             # save the confusion matrix
-            plt.savefig(os.path.join(DATA, 'global_raw_data_svc.png'))
+            plt.savefig(os.path.join(RESULTS, filename + '.png'))
             plt.show()
 
         return classification_report(self.y_test, y_pred, output_dict=True)
@@ -121,11 +121,13 @@ if __name__ == '__main__':
 
     # Train and evaluate the support vector machine model on the raw dataset and save it
     svc_model = GlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test)
-    report = svc_model.train_eval_model(print_confusion_matrix=True)
-    print("\nMetrics for the minority class:")
-    print(f"Precision: {report['1']['precision']: .3f}")
-    print(f"Recall: {report['1']['recall']: .3f}")
-    print(f"F1-score: {report['1']['f1-score']: .3f}")
+    report = svc_model.train_eval_model(filename='Global_Raw Dataset_SVC_confusion_matrix', print_confusion_matrix=True)
+    print("\nMetrics for the majority class:")
+    print(f"Precision: {report['0']['precision']: .3f}")
+    print(f"Recall: {report['0']['recall']: .3f}")
+    print(f"F1-score: {report['0']['f1-score']: .3f}")
 
     # Save the model
     svc_model.save_model('global_Raw Dataset_SVC.pkl')
+
+
