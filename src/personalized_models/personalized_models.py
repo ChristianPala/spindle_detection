@@ -5,7 +5,8 @@ from config import DATA, MODELS
 import os
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score, recall_score, roc_auc_score, \
+    confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -18,6 +19,16 @@ from typing import Dict, Tuple, Any
 
 # Constants:
 seed = 42  # For reproducibility
+
+
+# Functions:
+def calculate_specificity(y_true, y_pred):
+    """
+    This function calculates the specificity score given true and predicted labels.
+    """
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    specificity = tn / (tn+fp)
+    return specificity
 
 
 # Classes:
@@ -63,7 +74,9 @@ class PatientModelTrainer:
         self.models_dict = {}
         self.f1_score_dict = {}
 
-    def train(self) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, Any]]]:
+    from sklearn.metrics import precision_score, recall_score, accuracy_score, roc_auc_score, balanced_accuracy_score
+
+    def train(self) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
         """
         This method trains a model for each patient in the dataset with a different sampler and model.
         """
@@ -87,8 +100,21 @@ class PatientModelTrainer:
 
                 # Adjust predictions to match the paper by removing outlier positive predictions
                 adj_y_pred = adjust_prediction(y_pred)
-                adj_f_1 = f1_score(y_test, adj_y_pred)
-                self.f1_score_dict[sampler_name][model_name] = adj_f_1
+
+                # Calculate metrics
+                precision = precision_score(y_test, adj_y_pred, zero_division=0)
+                recall = recall_score(y_test, adj_y_pred)
+                f1_minority = f1_score(y_test, adj_y_pred, pos_label=1)
+                f1_avg = f1_score(y_test, adj_y_pred, average='macro')
+                specificity = calculate_specificity(y_test, adj_y_pred)
+                roc_auc = roc_auc_score(y_test, adj_y_pred)
+
+                # Save the metrics
+                self.f1_score_dict[sampler_name][model_name] = {'Precision': precision, 'Recall': recall,
+                                                                'F1 (minority)': f1_minority, 'F1 (average)': f1_avg,
+                                                                'Specificity': specificity, 'AUC-ROC': roc_auc}
+
+                # Save the model
                 self.models_dict[sampler_name][model_name] = model
 
                 with open(os.path.join(MODELS, f'{self.patient_id}_{sampler_name}_{model_name}.pkl'),
@@ -120,5 +146,5 @@ if __name__ == '__main__':
     with open(os.path.join(MODELS, 'all_models.pkl'), 'wb') as model_file:
         pickle.dump(models_dict, model_file)
 
-    with open(os.path.join(MODELS, 'models_f1_eval.pkl'), 'wb') as f1_file:
+    with open(os.path.join(MODELS, 'models_eval.pkl'), 'wb') as f1_file:
         pickle.dump(f1_score_dict, f1_file)

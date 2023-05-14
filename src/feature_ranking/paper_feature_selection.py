@@ -1,8 +1,12 @@
 # Libraries:
+import os
+
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 from skfeature.function.information_theoretical_based import MRMR
+
+from config import RESULTS
 from mutual_information_feature_selection import load_and_preprocess_data
 
 
@@ -62,15 +66,19 @@ class MRMRFeatureSelector(BaseEstimator, TransformerMixin):
 
 # Driver code:
 if __name__ == '__main__':
-    selector = MRMRFeatureSelector(16)  # Rank all features on the criteria of MRMR, the same
-    # one used in the paper.
 
     # Load the dataset
     X, y, features = load_and_preprocess_data()
 
+    selector = MRMRFeatureSelector(X.shape[1])  # Rank all features with the same method as the paper.
+
     # Apply feature selection
     X_new = selector.fit_transform(X, y)
 
-    # Print the ranking of the features
-    print(f"Ranking of the features using MRMR:")
-    [print(f"{feature}: {rank}") for feature, rank in zip(features, selector.selected_features_)]
+    sorted_indices = selector.selected_features_
+    sorted_features = features[sorted_indices]
+
+    with open(os.path.join(RESULTS, "global_feature_rankings_MRMRF.txt"), 'w') as f:
+        f.write("Ranking of the global features using MRMRF:\n")
+        for rank, feature in enumerate(sorted_features, start=1):
+            f.write(f"{feature}: {rank}\n")
