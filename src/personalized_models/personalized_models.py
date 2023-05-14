@@ -10,7 +10,7 @@ from sklearn.svm import SVC
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SVMSMOTE, ADASYN
 import pickle
-from src.modeling.modeling import adjust_prediction
+from src.global_models.paper_modeling_unbalanced import adjust_prediction
 from tqdm import tqdm
 from typing import Dict, Tuple, Any
 

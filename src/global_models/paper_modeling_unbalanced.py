@@ -1,5 +1,5 @@
 # Libraries
-from typing import Tuple
+from typing import Tuple, Union, Dict
 from matplotlib import pyplot as plt
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
@@ -8,8 +8,9 @@ import numpy as np
 import pandas as pd
 import os
 import pickle
-from config import DATA
+from config import DATA, MODELS
 
+# Initialization
 np.random.seed(42)  # For reproducibility
 
 
@@ -38,11 +39,11 @@ class DataHandler:
         self.X = X
         self.y = y
 
-
-    def train_val_test_split_ratio(self, train_ratio=0.6, val_ratio=0.2) \
+    def train_val_test_split_ratio(self, train_ratio=5/8, val_ratio=1/8) \
             -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray]:
         """
-        This function splits the data into training, validation and test sets, ensuring no patient is in more than one set.
+        This function splits the data into training, validation and test sets,
+        ensuring no patient is in more than one set. We use a 5:1:2 patient ratio for train:val:test.
         """
         patient_ids = self.X['patient_id'].unique()
         patient_size = len(patient_ids)
@@ -80,7 +81,10 @@ class GlobalModel:
         self.y_test = y_test
         self.scaler = StandardScaler()
 
-    def train_eval_model(self, print_confusion_matrix=False):
+    def train_eval_model(self, print_confusion_matrix=False) -> Union[str, Dict[str, Dict[str, float]]]:
+        """
+        This function trains and evaluates the model.
+        """
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.X_test = self.scaler.transform(self.X_test)
         self.model.fit(self.X_train, self.y_train)
@@ -98,9 +102,11 @@ class GlobalModel:
             plt.savefig(os.path.join(DATA, 'global_raw_data_svc.png'))
             plt.show()
 
+        return classification_report(self.y_test, y_pred, output_dict=True)
+
     def save_model(self, filename):
         # Save the model to disk in the models folder
-        pickle.dump(self.model, open(os.path.join(DATA, filename), 'wb'))
+        pickle.dump(self.model, open(os.path.join(MODELS, filename), 'wb'))
 
 
 # Driver code:
@@ -115,5 +121,11 @@ if __name__ == '__main__':
 
     # Train and evaluate the support vector machine model on the raw dataset and save it
     svc_model = GlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test)
-    svc_model.train_eval_model(print_confusion_matrix=True)
+    report = svc_model.train_eval_model(print_confusion_matrix=True)
+    print("\nMetrics for the minority class:")
+    print(f"Precision: {report['1']['precision']: .3f}")
+    print(f"Recall: {report['1']['recall']: .3f}")
+    print(f"F1-score: {report['1']['f1-score']: .3f}")
+
+    # Save the model
     svc_model.save_model('global_Raw Dataset_SVC.pkl')
