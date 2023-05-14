@@ -56,10 +56,6 @@ if __name__ == '__main__':
     svc_model_undersampled = BalancedGlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test, 'undersample')
     report_undersampled = svc_model_undersampled.train_eval_model \
         (filename='Global_Random Under Sampler_SVC_confusion_matrix', print_confusion_matrix=True)
-    print("\nMetrics for the majority class with undersampling:")
-    print(f"Precision: {report_undersampled['0']['precision']: .3f}")
-    print(f"Recall: {report_undersampled['0']['recall']: .3f}")
-    print(f"F1-score: {report_undersampled['0']['f1-score']: .3f}")
 
     # Save the model
     svc_model_undersampled.save_model('Global_Random Under Sampler_SVC')
@@ -69,10 +65,10 @@ if __name__ == '__main__':
     svc_model_oversampled = BalancedGlobalModel(SVC(kernel='linear'), X_train, y_train, X_test, y_test, 'oversample')
     report_oversampled = svc_model_oversampled.train_eval_model \
         (filename='Global_Random Over Sampler_SVC_confusion_matrix', print_confusion_matrix=True)
-    print("\nMetrics for the majority class with oversampling:")
-    print(f"Precision: {report_oversampled['0']['precision']: .3f}")
-    print(f"Recall: {report_oversampled['0']['recall']: .3f}")
-    print(f"F1-score: {report_oversampled['0']['f1-score']: .3f}")
 
     # Save the model
     svc_model_undersampled.save_model('Global_Random Over Sampler_SVC')
+
+    """
+    Like in the paper, the SVC model is the best performer with a balanced dataset with undersampling.
+    """
