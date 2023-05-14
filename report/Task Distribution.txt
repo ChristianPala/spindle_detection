@@ -1,0 +1,9 @@
+Task Distribution:
+
+- State of the Art Research: Amos Colombo
+- Data Preprocessing: Dyuman Bulloni Christian Pala
+- Feature Engineering: Dyuman Bulloni Christian Pala
+- Features Ranking: Christian Pala
+- Modeling: Dyuman Bulloni and Christian Pala
+- Hyper-parameter Tuning: Dyuman Bulloni and Christian Pala
+- Report: Amos Colombo

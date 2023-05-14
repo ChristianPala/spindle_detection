@@ -118,6 +118,9 @@ if __name__ == '__main__':
     X = pd.read_csv(os.path.join(DATA, 'features.csv'))
     y = pd.read_csv(os.path.join(DATA, 'target.csv'))
 
+    # remove the features we added to replicate the paper exactly:
+    # X = X.drop(columns=['complexity', 'mobility', 'hypnogram'])
+
     # Preprocess the data
     data_handler = DataHandler(X, y)
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.train_val_test_split_ratio()
@@ -127,6 +130,6 @@ if __name__ == '__main__':
     report = svc_model.train_eval_model(filename='Global_Raw Dataset_SVC_confusion_matrix', print_confusion_matrix=True)
 
     # Save the model
-    svc_model.save_model('global_Raw Dataset_SVC.pkl')
+    svc_model.save_model('global_Raw Dataset_SVC_paper.pkl')
 
 
