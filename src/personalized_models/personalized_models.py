@@ -71,25 +71,28 @@ class PatientModelTrainer:
             self.models_dict[sampler_name] = {}
             self.f1_score_dict[sampler_name] = {}
 
-            # Copy of the sampler as the sampler could be used again in a later step
-            X_sampled, y_sampled = copy.deepcopy(sampler).fit_resample(self.X, self.y)
+            X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, train_size=0.8, random_state=self.seed)
+
+            # Standardize the data before resampling to preserve the distribution
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+
+            # Resample the data
+            X_train_res, y_train_res = copy.deepcopy(sampler).fit_resample(X_train, y_train)
+
             for model_name, model in self.models.items():
-                # If the model type is one of those that requires standardization of data before the augmentation.
-                if type(model) in self.require_standardization:
-                    X_sampled = StandardScaler().fit_transform(self.X, self.y)  # do first standard scaling
-                    X_sampled, y_sampled = sampler.fit_resample(X_sampled, self.y)  # then augment data,
-                    # so distribution is preserved
-                X_train, X_test, y_train, y_test = train_test_split(X_sampled, y_sampled, train_size=0.8,
-                                                                    random_state=self.seed)
-                model.fit(X_train, y_train)
+                model.fit(X_train_res, y_train_res)
                 y_pred = model.predict(X_test)
+
                 # Adjust predictions to match the paper by removing outlier positive predictions
                 adj_y_pred = adjust_prediction(y_pred)
                 adj_f_1 = f1_score(y_test, adj_y_pred)
                 self.f1_score_dict[sampler_name][model_name] = adj_f_1
                 self.models_dict[sampler_name][model_name] = model
-                with open(os.path.join(MODELS, f'{self.patient_id}_{sampler_name}_{model_name}.pkl'), 'wb') \
-                        as model_serialized:
+
+                with open(os.path.join(MODELS, f'{self.patient_id}_{sampler_name}_{model_name}.pkl'),
+                          'wb') as model_serialized:
                     pickle.dump(model, model_serialized)
 
         return self.models_dict, self.f1_score_dict

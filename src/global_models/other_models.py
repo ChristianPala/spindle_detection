@@ -11,6 +11,8 @@ if __name__ == '__main__':
     X = pd.read_csv(os.path.join(DATA, 'features.csv'))
     y = pd.read_csv(os.path.join(DATA, 'target.csv'))
 
+    print(y.head())
+
     # Preprocess the data
     data_handler = DataHandler(X, y)
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.train_val_test_split_ratio()
@@ -28,4 +30,8 @@ if __name__ == '__main__':
         print(f"Precision: {report['0']['precision']: .3f}")
         print(f"Recall: {report['0']['recall']: .3f}")
         print(f"F1-score: {report['0']['f1-score']: .3f}")
+
+        """
+        Like in the paper, the SVC model performs the best on the global model.
+        """
 
