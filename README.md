@@ -16,3 +16,12 @@ The processing order is as follows:
 
 The various models can then be tested in their respective folders.
 
+# Task Division:
+- State of the Art Research: Amos Colombo
+- Feature planning: Amos Colombo
+- Data Preprocessing: Christian Pala Dyuman Bulloni 
+- Feature Engineering: Dyuman Bulloni Christian Pala
+- Features Ranking: Christian Pala
+- Modeling: Christian Pala Dyuman Bulloni
+- Hyper-parameter Tuning: Dyuman Bulloni Christian Pala
+- Report: Amos Colombo Dyuman Bulloni Christian Pala
